@@ -6,12 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -30,6 +32,10 @@ public class CreateContractRequestDTO {
     @NotNull(message = "dateIssued is required")
     private LocalDate dateIssued;
 
+    @NotBlank(message = "so CCCD is required")
+    @Size(max = 12, message = "so CCCD max length is 12")
+    private String soCCCD;
+
     @NotBlank(message = "issuingLocation is required")
     private String issuingLocation;
 
@@ -38,6 +44,9 @@ public class CreateContractRequestDTO {
 
     @NotNull(message = "branchId is required")
     private Long branchId;
+
+    @NotBlank(message = "jobPosition is required")
+    private String jobPosition;
 
     @Email(message = "email is invalid")
     @NotBlank(message = "email is required")
@@ -70,5 +79,8 @@ public class CreateContractRequestDTO {
     @NotNull(message = "probationarySalary is required")
     @Positive(message = "probationarySalary must be positive")
     private BigDecimal probationarySalary;
+
+    @Valid
+    private List<CreateStaffDocumentRequestDTO> staffDocuments;
 }
 

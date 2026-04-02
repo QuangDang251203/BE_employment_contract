@@ -20,9 +20,6 @@ public class Branch {
 	@Id
 	private Long id;
 
-	@Column(name = "branch_code", nullable = false, length = 6)
-	private String branchCode;
-
 	@Column(name = "branch_name", nullable = false, length = 50)
 	private String branchName;
 

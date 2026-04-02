@@ -31,6 +31,9 @@ public class Staff {
 	@Column(nullable = false, length = 255)
 	private String address;
 
+	@Column(name = "so_cccd", nullable = false, unique = true)
+	private String soCCCD;
+
 	@Column(name = "date_issued", nullable = false)
 	private java.time.LocalDate dateIssued;
 

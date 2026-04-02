@@ -22,6 +22,8 @@ public class ContractDTO {
 	private LocalDate endDate;
 	private ContractStatus status;
 	private Long branchId;
+	private String branchName;
+	private String jobPosition;
 	private String level;
 	private String salaryRank;
 	private BigDecimal percentageOfSalary;

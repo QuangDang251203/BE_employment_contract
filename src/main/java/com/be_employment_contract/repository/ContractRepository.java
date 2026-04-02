@@ -13,6 +13,8 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
 
 	Optional<Contract> findByContractCodeAndStaffAccountUsernameAndStatus(String contractCode, String username, ContractStatus status);
 
+	Optional<Contract> findByContractCodeAndStaffAccountUsername(String contractCode, String username);
+
 	@Query("""
 			select c
 			from Contract c
@@ -21,6 +23,16 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
 			order by c.createAt desc
 		""")
 	List<Contract> findAllWithStaffAndBranch();
+
+	@Query("""
+			select c
+			from Contract c
+			join fetch c.staff s
+			join fetch c.branch b
+			where b.id = :branchId
+			order by c.createAt desc
+		""")
+	List<Contract> findAllByBranchIdWithStaffAndBranch(@Param("branchId") Long branchId);
 
 	@Query("""
 			select c

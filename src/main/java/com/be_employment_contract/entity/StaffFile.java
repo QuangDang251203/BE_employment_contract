@@ -24,11 +24,13 @@ public class StaffFile {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, length = 150)
+	@Column(name = "file_name", nullable = false, length = 150)
 	private String fileName;
 
-	@Column(nullable = false, length = 255)
-	private String fileUrl;
+	@Column(name = "file_path", nullable = false, length = 255)
+	private String filePath;
+
+	private String fileType;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "staff_id", nullable = false)

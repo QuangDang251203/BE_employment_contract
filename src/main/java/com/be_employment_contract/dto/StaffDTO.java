@@ -14,6 +14,7 @@ public class StaffDTO {
 	private java.time.LocalDate dateOfBirth;
 	private String address;
 	private java.time.LocalDate dateIssued;
+	private String soCCCD;
 	private String issuingLocation;
 	private String levelOfTraining;
 	private Long branchId;

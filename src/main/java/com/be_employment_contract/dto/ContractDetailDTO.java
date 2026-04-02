@@ -18,7 +18,7 @@ public class ContractDetailDTO {
     private LocalDate decisionDate;
     private String staffFullName;
     private LocalDate dateOfBirth;
-    private Long citizenIdNumber;
+    private String soCCCD;
     private LocalDate dateIssued;
     private String issuingLocation;
     private String email;
@@ -30,8 +30,10 @@ public class ContractDetailDTO {
     private LocalDate endDate;
     private LocalDateTime createdAt;
     private String branchName;
+    private String jobPosition;
     private String salaryRank;
     private String level;
     private BigDecimal percentageOfSalary;
     private BigDecimal probationarySalary;
+    private List<ContractFileDTO> contractFiles;
 }

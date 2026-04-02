@@ -22,6 +22,6 @@ public class ContractListItemDTO {
     private LocalDate endDate;
     private LocalDateTime createdAt;
     private String branchName;
-    private String branchCode;
+    private String jobPosition;
     private ContractStatus contractStatus;
 }
