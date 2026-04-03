@@ -10,6 +10,7 @@ import com.be_employment_contract.dto.LoginRequestDTO;
 import com.be_employment_contract.dto.OTPDTO;
 import com.be_employment_contract.dto.OtpIssueResponseDTO;
 import com.be_employment_contract.dto.StaffDocumentDTO;
+import com.be_employment_contract.dto.ContractProcessFileDTO;
 import com.be_employment_contract.exception.BusinessException;
 import com.be_employment_contract.response.ApiResponse;
 import com.be_employment_contract.service.contract.ContractService;
@@ -117,30 +118,20 @@ public class ContractController {
         return ResponseEntity.ok(ApiResponse.success(ApiCode.SUCCESS, "OTP generated and sent to email", result));
     }
 
-    @PostMapping("/verify-otp")
-    public ResponseEntity<ApiResponse<ContractDTO>> verifyOtp(@Valid @RequestBody OTPDTO otpDTO) {
-        log.info("API verify OTP for username={} contractCode={}", otpDTO.getUsername(), otpDTO.getContractCode());
-        ContractDTO result = contractService.verifyOtpAndComplete(otpDTO);
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.SUCCESS, "Contract status moved to COMPLETED", result));
-    }
-
     @PostMapping(value = "/verify-otp-sign", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ContractDTO>> verifyOtpAndSign(
             @Valid @RequestPart("otp") OTPDTO otpDTO,
             @RequestPart("signature") MultipartFile signatureImage
     ) {
         log.info("API verify OTP + sign for username={} contractCode={}", otpDTO.getUsername(), otpDTO.getContractCode());
-        ContractDTO result = contractService.verifyOtpAndCompleteWithSignature(otpDTO, signatureImage);
-        return ResponseEntity.ok(ApiResponse.success(ApiCode.SUCCESS, "Contract signed successfully", result));
+        ContractDTO result = contractService.verifyOtpAndComplete(otpDTO, signatureImage);
+        return ResponseEntity.ok(ApiResponse.success(ApiCode.SUCCESS, "Contract signed and completed successfully", result));
     }
 
-    @PostMapping(value = "/stamp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<ContractDTO>> stampContract(
-            @RequestPart("contractCode") String contractCode,
-            @RequestPart("stamp") MultipartFile stampImage
-    ) {
+    @PostMapping("/stamp/{contractCode}")
+    public ResponseEntity<ApiResponse<ContractDTO>> stampContract(@PathVariable String contractCode) {
         log.info("API stamp contract contractCode={}", contractCode);
-        ContractDTO result = contractService.stampContract(contractCode, stampImage);
+        ContractDTO result = contractService.stampContract(contractCode);
         return ResponseEntity.ok(ApiResponse.success(ApiCode.SUCCESS, "Contract stamped successfully", result));
     }
 
@@ -171,6 +162,13 @@ public class ContractController {
             throw new BusinessException(ApiCode.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
                     "Cannot read staff document file");
         }
+    }
+
+    @GetMapping("/{contractCode}/process-files")
+    public ResponseEntity<ApiResponse<List<ContractProcessFileDTO>>> getContractProcessFiles(@PathVariable String contractCode) {
+        log.info("API get contract process files for contractCode={}", contractCode);
+        List<ContractProcessFileDTO> files = contractService.getContractProcessFiles(contractCode);
+        return ResponseEntity.ok(ApiResponse.success(ApiCode.SUCCESS, "Get contract process files successfully", files));
     }
 
     private Resource buildResource(String filePath) throws MalformedURLException {

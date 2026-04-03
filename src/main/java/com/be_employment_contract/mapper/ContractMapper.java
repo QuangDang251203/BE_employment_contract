@@ -103,6 +103,7 @@ public final class ContractMapper {
         dto.setLevel(contract.getLevel());
         dto.setPercentageOfSalary(contract.getPercentageOfSalary());
         dto.setProbationarySalary(contract.getProbationarySalary());
+        dto.setStatus(contract.getStatus());
         dto.setContractFiles(toContractFileDtoList(contractFiles));
         return dto;
     }
@@ -136,4 +137,3 @@ public final class ContractMapper {
                 .toList();
     }
 }
-

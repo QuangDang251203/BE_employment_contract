@@ -13,6 +13,7 @@ import com.be_employment_contract.dto.LoginRequestDTO;
 import com.be_employment_contract.dto.OTPDTO;
 import com.be_employment_contract.dto.OtpIssueResponseDTO;
 import com.be_employment_contract.dto.ProvisionedAccountDTO;
+import com.be_employment_contract.dto.ContractProcessFileDTO;
 import com.be_employment_contract.dto.StaffDocumentDTO;
 import com.be_employment_contract.entity.Account;
 import com.be_employment_contract.entity.Contract;
@@ -194,34 +195,15 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public ContractDTO verifyOtpAndComplete(OTPDTO otpDTO) {
+    public ContractDTO verifyOtpAndComplete(OTPDTO otpDTO, MultipartFile signatureImage) {
         String redisKey = AppConstants.REDIS_OTP_PREFIX + ":" + otpDTO.getUsername() + ":" + otpDTO.getContractCode();
         String redisOtp = redisTemplate.opsForValue().get(redisKey);
 
         if (redisOtp == null || !redisOtp.equals(otpDTO.getOtpCode())) {
             throw new BusinessException(ApiCode.OTP_INVALID, HttpStatus.BAD_REQUEST, "OTP is invalid or expired");
         }
-
-        Contract contract = contractRepository
-                .findByContractCodeAndStaffAccountUsernameAndStatus(otpDTO.getContractCode(), otpDTO.getUsername(), ContractStatus.PENDING_SIGN)
-                .orElseThrow(() -> new BusinessException(ApiCode.NOT_FOUND, HttpStatus.NOT_FOUND, "Pending contract not found"));
-
-        contract.setStatus(ContractStatus.COMPLETED);
-        Contract updated = contractRepository.save(contract);
-        redisTemplate.delete(redisKey);
-
-        log.info("Contract code={} marked COMPLETED by username={}", updated.getContractCode(), otpDTO.getUsername());
-        return ContractMapper.toDto(updated);
-    }
-
-    @Override
-    @Transactional
-    public ContractDTO verifyOtpAndCompleteWithSignature(OTPDTO otpDTO, MultipartFile signatureImage) {
-        String redisKey = AppConstants.REDIS_OTP_PREFIX + ":" + otpDTO.getUsername() + ":" + otpDTO.getContractCode();
-        String redisOtp = redisTemplate.opsForValue().get(redisKey);
-
-        if (redisOtp == null || !redisOtp.equals(otpDTO.getOtpCode())) {
-            throw new BusinessException(ApiCode.OTP_INVALID, HttpStatus.BAD_REQUEST, "OTP is invalid or expired");
+        if (signatureImage == null || signatureImage.isEmpty()) {
+            throw new BusinessException(ApiCode.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "Signature image is required");
         }
 
         Contract contract = contractRepository
@@ -257,17 +239,17 @@ public class ContractServiceImpl implements ContractService {
         signedContractFile.setSignedAt(LocalDateTime.now());
         contractFileRepository.save(signedContractFile);
 
-        contract.setStatus(ContractStatus.SIGNED);
+        contract.setStatus(ContractStatus.COMPLETED);
         Contract updated = contractRepository.save(contract);
         redisTemplate.delete(redisKey);
 
-        log.info("Contract code={} marked SIGNED with signed file={}", updated.getContractCode(), signedFile.fileName());
+        log.info("Contract code={} marked COMPLETED with signed file={}", updated.getContractCode(), signedFile.fileName());
         return ContractMapper.toDto(updated);
     }
 
     @Override
     @Transactional
-    public ContractDTO stampContract(String contractCode, MultipartFile stampImage) {
+    public ContractDTO stampContract(String contractCode) {
         log.info("Stamp contract flow started for contractCode={}", contractCode);
 
         Contract contract = contractRepository.findById(contractCode)
@@ -282,7 +264,6 @@ public class ContractServiceImpl implements ContractService {
         try {
             stampedFile = ContractDocumentUtils.createStampedPdf(
                     Paths.get(latestSigned.getFilePath()),
-                    stampImage,
                     contractCode
             );
         } catch (IOException exception) {
@@ -440,6 +421,25 @@ public class ContractServiceImpl implements ContractService {
                 staffFile.getFilePath(),
                 staffFile.getFileType()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ContractProcessFileDTO> getContractProcessFiles(String contractCode) {
+        log.info("Get contract process files for contractCode={}", contractCode);
+
+        if (!contractRepository.existsById(contractCode)) {
+            throw new BusinessException(ApiCode.NOT_FOUND, HttpStatus.NOT_FOUND, "Contract not found");
+        }
+
+        List<ContractProcessFileDTO> processFiles = contractFileRepository
+                .findByContractContractCodeOrderBySignedAtDesc(contractCode)
+                .stream()
+                .map(file -> new ContractProcessFileDTO(file.getId(), file.getFileType(), file.getSignedAt()))
+                .toList();
+
+        log.info("Get contract process files completed for contractCode={} count={}", contractCode, processFiles.size());
+        return processFiles;
     }
 
     private void validateContractDates(CreateContractRequestDTO request) {

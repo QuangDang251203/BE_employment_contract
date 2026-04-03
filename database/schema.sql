@@ -52,3 +52,22 @@ CREATE TABLE IF NOT EXISTS contract (
     CONSTRAINT fk_contract_branch FOREIGN KEY (branch_id) REFERENCES branch(id)
 );
 
+CREATE TABLE IF NOT EXISTS staff_file (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(150) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    file_type VARCHAR(120) NOT NULL,
+    staff_id BIGINT NOT NULL,
+    CONSTRAINT fk_staff_file_staff FOREIGN KEY (staff_id) REFERENCES staff(id)
+);
+
+CREATE TABLE IF NOT EXISTS contract_file (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    contract_code VARCHAR(20) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_type VARCHAR(120) NOT NULL,
+    signed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_contract_file_contract FOREIGN KEY (contract_code) REFERENCES contract(contract_code)
+);
+

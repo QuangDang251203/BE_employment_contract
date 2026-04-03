@@ -90,8 +90,9 @@ public final class ContractDocumentUtils {
             PDImageXObject image = LosslessFactory.createFromImage(document, signature);
             float width = 160f;
             float height = 60f;
-            float x = page.getMediaBox().getWidth() - width - 40f;
-            float y = 80f;
+            // Place signature under 'NGUOI LAO DONG' block (left column, higher position).
+            float x = 120f;
+            float y = 490f;
 
             try (PDPageContentStream contentStream = new PDPageContentStream(
                     document,
@@ -115,29 +116,28 @@ public final class ContractDocumentUtils {
         return new GeneratedContractFile(signedPdfPath.getFileName().toString(), signedPdfPath.toString(), "application/pdf");
     }
 
-    public static GeneratedContractFile createStampedPdf(Path sourcePdfPath, MultipartFile stampImage, String contractCode) throws IOException {
-        if (stampImage == null || stampImage.isEmpty()) {
-            throw new IOException("Stamp image is empty");
-        }
-
+    public static GeneratedContractFile createStampedPdf(Path sourcePdfPath, String contractCode) throws IOException {
         Path outputDir = Paths.get(AppConstants.CONTRACT_OUTPUT_DIR).toAbsolutePath().normalize();
         Files.createDirectories(outputDir);
 
         String stampedName = contractCode + "_stamped_" + System.currentTimeMillis() + ".pdf";
         Path stampedPdfPath = outputDir.resolve(stampedName);
 
-        try (PDDocument document = PDDocument.load(sourcePdfPath.toFile())) {
-            BufferedImage stamp = ImageIO.read(stampImage.getInputStream());
+        try (PDDocument document = PDDocument.load(sourcePdfPath.toFile());
+             InputStream stampInput = new ClassPathResource(AppConstants.STAMP_IMAGE_CLASSPATH).getInputStream()) {
+            BufferedImage stamp = ImageIO.read(stampInput);
             if (stamp == null) {
-                throw new IOException("Cannot read stamp image");
+                throw new IOException("Cannot read static stamp image");
             }
 
             PDPage page = document.getPage(document.getNumberOfPages() - 1);
             PDImageXObject image = LosslessFactory.createFromImage(document, stamp);
-            float width = 120f;
+            float width = 160f;
             float height = 120f;
-            float x = 40f;
-            float y = 80f;
+            // Mirror employee signature block to the right side under "NGUOI SU DUNG LAO DONG".
+            float x = page.getMediaBox().getWidth() - 120f - width;
+            // Lower stamp by ~1.5cm (about 42.5 PDF points): 490 -> 448.
+            float y = 448f;
 
             try (PDPageContentStream contentStream = new PDPageContentStream(
                     document,
@@ -156,7 +156,9 @@ public final class ContractDocumentUtils {
         Files.createDirectories(stampDir);
         String stampName = contractCode + "_" + UUID.randomUUID() + "_stamp.png";
         Path stampPath = stampDir.resolve(stampName);
-        Files.copy(stampImage.getInputStream(), stampPath, StandardCopyOption.REPLACE_EXISTING);
+        try (InputStream stampCopyInput = new ClassPathResource(AppConstants.STAMP_IMAGE_CLASSPATH).getInputStream()) {
+            Files.copy(stampCopyInput, stampPath, StandardCopyOption.REPLACE_EXISTING);
+        }
 
         return new GeneratedContractFile(stampedPdfPath.getFileName().toString(), stampedPdfPath.toString(), "application/pdf");
     }

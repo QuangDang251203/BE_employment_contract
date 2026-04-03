@@ -13,6 +13,7 @@ public final class AppConstants {
     public static final String STAFF_DOCUMENT_STORAGE_DIR = "C:/Users/Hi/OneDrive - utt.vn/DOCUMENT_FOR_EMPLOYMENT_CONTRACT";
     public static final String CONTRACT_TEMPLATE_CLASSPATH = "templates/[AGRI] Hợp đồng thử việc.docx";
     public static final String CONTRACT_OUTPUT_DIR = "C:/Users/Hi/OneDrive - utt.vn/CÔNG VIỆC/Template_demo";
+    public static final String STAMP_IMAGE_CLASSPATH = "static/stamp/stamp.png";
     public static final String CONTRACT_FILE_TYPE_GENERATED_PDF = "GENERATED_PDF";
     public static final String CONTRACT_FILE_TYPE_SIGNED_PDF = "SIGNED_PDF";
     public static final String CONTRACT_FILE_TYPE_STAMPED_PDF = "STAMPED_PDF";

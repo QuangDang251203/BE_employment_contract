@@ -9,6 +9,7 @@ import com.be_employment_contract.dto.LoginRequestDTO;
 import com.be_employment_contract.dto.OTPDTO;
 import com.be_employment_contract.dto.OtpIssueResponseDTO;
 import com.be_employment_contract.dto.StaffDocumentDTO;
+import com.be_employment_contract.dto.ContractProcessFileDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,11 +20,9 @@ public interface ContractService {
 
 	OtpIssueResponseDTO loginAndIssueOtp(LoginRequestDTO request);
 
-	ContractDTO verifyOtpAndComplete(OTPDTO otpDTO);
+	ContractDTO verifyOtpAndComplete(OTPDTO otpDTO, MultipartFile signatureImage);
 
-	ContractDTO verifyOtpAndCompleteWithSignature(OTPDTO otpDTO, MultipartFile signatureImage);
-
-	ContractDTO stampContract(String contractCode, MultipartFile stampImage);
+	ContractDTO stampContract(String contractCode);
 
 	ContractFileDTO getPreferredContractFile(String contractCode);
 
@@ -38,4 +37,6 @@ public interface ContractService {
 	List<ContractDTO> getContractsByBranchId(Long branchId);
 
 	ContractDetailDTO getContractDetail(String contractCode);
+
+	List<ContractProcessFileDTO> getContractProcessFiles(String contractCode);
 }

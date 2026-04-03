@@ -1,5 +1,6 @@
 package com.be_employment_contract.dto;
 
+import com.be_employment_contract.constant.ContractStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,5 +36,6 @@ public class ContractDetailDTO {
     private String level;
     private BigDecimal percentageOfSalary;
     private BigDecimal probationarySalary;
+    private ContractStatus status;
     private List<ContractFileDTO> contractFiles;
 }
